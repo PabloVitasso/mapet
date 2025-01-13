@@ -21,7 +21,7 @@ const server = async ({
     );
 
     await pptrGpt.init({
-        screenshots: false,
+        screenshots: true,
         headless,
     });
 
@@ -109,7 +109,7 @@ const server = async ({
                 }
             }
         }, 1000 * 60 * 5);
-
+        console.log('Hello')
         console.log(`pptr-gpt running on port ${port}`);
     });
 

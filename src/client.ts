@@ -22,11 +22,10 @@ interface ChatHistory {
 }
 
 const typeClick = async (page: any, text: string): Promise<void> => {
-  
   await page.keyboard.sendCharacter(text).catch((err: any) => {
     console.log(err)
   })
-  await page.click("button[data-testid='send-button']"); 
+  await page.click("button[data-testid='send-button']");
 };
 
 const init = async (options: {
@@ -73,7 +72,7 @@ const singleMessage = async (text: string): Promise<string> => {
   const response = await page.evaluate(async () => {
     let prevText: string | null = null;
     let currentText: any = document.querySelector(
-      `div[data-testid='conversation-turn-3']`
+      `div[data-message-author-role="assistant"]`
     )?.innerHTML;
 
     const getHTML = async (): Promise<string> => {
@@ -82,7 +81,7 @@ const singleMessage = async (text: string): Promise<string> => {
           prevText = currentText;
 
           currentText = document.querySelector(
-            `div[data-testid='conversation-turn-3']`
+            `div[data-message-author-role="assistant"]`
           )?.innerHTML;
 
           if (currentText && prevText === currentText) {
@@ -117,9 +116,9 @@ const createChat = async (text: string): Promise<{
 
   const send = async (message: string): Promise<string> => {
     const screenshots = storage.get('screenshots');
-  
+
     await typeClick(page, message);
-  
+
     if (screenshots) {
       await page.screenshot({ path: path.join(__dirname, `public/screenshot-${responseMessageId + 1}.png`) });
     }
@@ -132,25 +131,28 @@ const createChat = async (text: string): Promise<{
     const response = await page.evaluate(
       async ({ responseMessageId }: { responseMessageId: number }) => {
         let prevText: string | null = null;
-        let currentText: any = document.querySelector(
-          `div[data-testid='conversation-turn-${responseMessageId}']`
-        )?.innerHTML;
+        let currentTexts = document.querySelectorAll(
+          `div[data-message-author-role="assistant"]`
+        )
+        let currentText: any = currentTexts.length ? currentTexts[currentTexts.length -1].innerHTML : null
 
         const getHTML = async (): Promise<string> => {
           return new Promise((resolve) => {
             const interval = setInterval(() => {
               prevText = currentText;
 
-              currentText = document.querySelector(
-                `div[data-testid='conversation-turn-${responseMessageId}']`
-              )?.innerHTML;
+              currentTexts = document.querySelectorAll(
+                `div[data-message-author-role="assistant"]`
+              )
+
+              currentText = currentTexts.length ? currentTexts[currentTexts.length -1].innerHTML : null
 
               if (currentText && prevText === currentText) {
                 clearInterval(interval);
 
                 resolve(currentText);
               }
-            }, 3000);
+            }, 10000);
           });
         };
 

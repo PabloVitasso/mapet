@@ -17,7 +17,7 @@ const server = async ({ port = 3000, headless = true, }) => {
         origin: "*",
     }));
     await client_1.default.init({
-        screenshots: false,
+        screenshots: true,
         headless,
     });
     app.get("/", (req, res) => {
@@ -83,6 +83,7 @@ const server = async ({ port = 3000, headless = true, }) => {
                 }
             }
         }, 1000 * 60 * 5);
+        console.log('Hello');
         console.log(`pptr-gpt running on port ${port}`);
     });
     // process on exit

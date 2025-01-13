@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 
 const repl = async () => {
     await chatGpt.init({
-        headless: false
+        headless: true
     });
     
     const userQuery = await rl.question('You: ');

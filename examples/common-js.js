@@ -2,7 +2,7 @@ const chatGpt = require('../index')
 
 const test = async () => {
   await chatGpt.init({
-    screenshots: true,
+    screenshots: false,
     headless: false//'shell'
   });
 

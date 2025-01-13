@@ -23,10 +23,13 @@ const usePuppeteer = () => {
     return browser;
   };
 
+  const delay = (ms = 3000) => new Promise(resolve => setTimeout(resolve, ms))
+
   const goTo = async (url: string): Promise<any> => {
     const page = await browser!.newPage();
     await page.goto(url);
     await page.setViewport({ width: 1360, height: 980, deviceScaleFactor: 1 });
+    await delay()
     return page;
   };
 

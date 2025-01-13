@@ -13,10 +13,12 @@ const usePuppeteer = () => {
         browser = await puppeteer_extra_1.default.launch(params);
         return browser;
     };
+    const delay = (ms = 3000) => new Promise(resolve => setTimeout(resolve, ms));
     const goTo = async (url) => {
         const page = await browser.newPage();
         await page.goto(url);
         await page.setViewport({ width: 1360, height: 980, deviceScaleFactor: 1 });
+        await delay();
         return page;
     };
     const close = async () => {

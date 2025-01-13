@@ -54,13 +54,13 @@ const singleMessage = async (text) => {
     const response = await page.evaluate(async () => {
         var _a;
         let prevText = null;
-        let currentText = (_a = document.querySelector(`div[data-testid='conversation-turn-3']`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
+        let currentText = (_a = document.querySelector(`div[data-message-author-role="assistant"]`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
         const getHTML = async () => {
             return new Promise((resolve) => {
                 const interval = setInterval(() => {
                     var _a;
                     prevText = currentText;
-                    currentText = (_a = document.querySelector(`div[data-testid='conversation-turn-3']`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
+                    currentText = (_a = document.querySelector(`div[data-message-author-role="assistant"]`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
                     if (currentText && prevText === currentText) {
                         clearInterval(interval);
                         resolve(currentText);
@@ -90,20 +90,20 @@ const createChat = async (text) => {
             content: message,
         });
         const response = await page.evaluate(async ({ responseMessageId }) => {
-            var _a;
             let prevText = null;
-            let currentText = (_a = document.querySelector(`div[data-testid='conversation-turn-${responseMessageId}']`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
+            let currentTexts = document.querySelectorAll(`div[data-message-author-role="assistant"]`);
+            let currentText = currentTexts.length ? currentTexts[currentTexts.length - 1].innerHTML : null;
             const getHTML = async () => {
                 return new Promise((resolve) => {
                     const interval = setInterval(() => {
-                        var _a;
                         prevText = currentText;
-                        currentText = (_a = document.querySelector(`div[data-testid='conversation-turn-${responseMessageId}']`)) === null || _a === void 0 ? void 0 : _a.innerHTML;
+                        currentTexts = document.querySelectorAll(`div[data-message-author-role="assistant"]`);
+                        currentText = currentTexts.length ? currentTexts[currentTexts.length - 1].innerHTML : null;
                         if (currentText && prevText === currentText) {
                             clearInterval(interval);
                             resolve(currentText);
                         }
-                    }, 3000);
+                    }, 10000);
                 });
             };
             return getHTML();
