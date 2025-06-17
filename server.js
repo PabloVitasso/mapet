@@ -29,7 +29,7 @@ const server = async ({ port = 3000, headless = true, }) => {
             message: "pptr-gpt api running"
         });
     });
-    app.post("/ask", async (req, res) => {
+    app.post("/ask", (async (req, res) => {
         try {
             const { question } = req.body;
             const answer = await getAnswerFromQuestion(question);
@@ -39,8 +39,8 @@ const server = async ({ port = 3000, headless = true, }) => {
             console.log('err', error);
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
-    app.post("/v1/chat/completions", async (req, res) => {
+    }));
+    app.post("/v1/chat/completions", (async (req, res) => {
         try {
             const { messages, model } = req.body;
             // Only support single user message for now
@@ -72,8 +72,8 @@ const server = async ({ port = 3000, headless = true, }) => {
             console.log('err', error);
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
-    app.post("/create-chat", async (req, res) => {
+    }));
+    app.post("/create-chat", (async (req, res) => {
         try {
             const { message } = req.body;
             const id = (0, uuid_1.v4)();
@@ -84,8 +84,8 @@ const server = async ({ port = 3000, headless = true, }) => {
         catch (error) {
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
-    app.post("/chat/send-message", async (req, res) => {
+    }));
+    app.post("/chat/send-message", (async (req, res) => {
         try {
             const { id, message } = req.body;
             const chat = chats[id];
@@ -99,7 +99,7 @@ const server = async ({ port = 3000, headless = true, }) => {
         catch (error) {
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
+    }));
     // Minimal bearer token middleware (always allow)
     app.use("/chat/completions", (req, res, next) => {
         const auth = req.headers["authorization"];
@@ -112,7 +112,7 @@ const server = async ({ port = 3000, headless = true, }) => {
         // Accept any Bearer token, always allow
         next();
     });
-    app.post("/chat/completions", async (req, res) => {
+    app.post("/chat/completions", (async (req, res) => {
         try {
             const { model, messages, max_tokens = 1024, temperature = 1.0 } = req.body;
             // Validate required fields
@@ -145,16 +145,15 @@ const server = async ({ port = 3000, headless = true, }) => {
         catch (error) {
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
-    app.get("/chat/:id/close", async (req, res) => {
+    }));
+    app.get("/chat/:id/close", (async (req, res) => {
         const { id } = req.params;
         const chat = chats[id];
         if (!chat) {
             return res.status(404).json({ error: "Chat not found" });
         }
         await chat.close();
-        res.json({ status: "ok" });
-    });
+    }));
     app.listen(port, () => {
         setInterval(async () => {
             console.log("checking chats for closing");

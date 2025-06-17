@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response, RequestHandler } from "express";
 import bodyParser from "body-parser";
 import pptrGpt from "./client";
 import morgan from "morgan";
@@ -36,54 +36,63 @@ const server = async ({
         });
     });
 
-    app.post("/ask", async (req, res) => {
+    app.post(
+        "/ask",
+        (async (req: Request, res: Response) => {
+            try {
+                const { question } = req.body;
+
+                const answer = await getAnswerFromQuestion(question);
+
+                res.json({ answer });
+            } catch (error) {
+                console.log('err', error);
+
+                res.status(500).json({ error: "Something went wrong" });
+            }
+        }) as unknown as RequestHandler
+    );
+
+app.post(
+    "/v1/chat/completions",
+    (async (req: Request, res: Response) => {
         try {
-            const { question } = req.body;
+            const { messages, model } = req.body;
+            // Only support single user message for now
+            const userMsg = Array.isArray(messages) && messages.length > 0 ? messages[messages.length - 1].content : "";
+            const answer = await getAnswerFromQuestion(userMsg);
 
-            const answer = await getAnswerFromQuestion(question);
-
-            res.json({ answer });
+            res.json({
+                id: "chatcmpl-" + uuid(),
+                object: "chat.completion",
+                created: Math.floor(Date.now() / 1000),
+                model: model || "gpt-3.5-turbo",
+                choices: [
+                    {
+                        index: 0,
+                        message: {
+                            role: "assistant",
+                            content: answer
+                        },
+                        finish_reason: "stop"
+                    }
+                ],
+                usage: {
+                    prompt_tokens: userMsg.length,
+                    completion_tokens: answer.length,
+                    total_tokens: userMsg.length + answer.length
+                }
+            });
         } catch (error) {
-            console.log('err', error)
-
+            console.log('err', error);
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
-app.post("/v1/chat/completions", async (req, res) => {
-    try {
-        const { messages, model } = req.body;
-        // Only support single user message for now
-        const userMsg = Array.isArray(messages) && messages.length > 0 ? messages[messages.length - 1].content : "";
-        const answer = await getAnswerFromQuestion(userMsg);
+    }) as unknown as RequestHandler
+);
 
-        res.json({
-            id: "chatcmpl-" + uuid(),
-            object: "chat.completion",
-            created: Math.floor(Date.now() / 1000),
-            model: model || "gpt-3.5-turbo",
-            choices: [
-                {
-                    index: 0,
-                    message: {
-                        role: "assistant",
-                        content: answer
-                    },
-                    finish_reason: "stop"
-                }
-            ],
-            usage: {
-                prompt_tokens: userMsg.length,
-                completion_tokens: answer.length,
-                total_tokens: userMsg.length + answer.length
-            }
-        });
-    } catch (error) {
-        console.log('err', error);
-        res.status(500).json({ error: "Something went wrong" });
-    }
-});
-
-    app.post("/create-chat", async (req, res) => {
+app.post(
+    "/create-chat",
+    (async (req: Request, res: Response) => {
         try {
             const { message } = req.body;
             const id = uuid();
@@ -99,9 +108,12 @@ app.post("/v1/chat/completions", async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
+    }) as unknown as RequestHandler
+);
 
-    app.post("/chat/send-message", async (req, res) => {
+app.post(
+    "/chat/send-message",
+    (async (req: Request, res: Response) => {
         try {
             const { id, message } = req.body;
 
@@ -119,7 +131,8 @@ app.post("/v1/chat/completions", async (req, res) => {
         } catch (error) {
             res.status(500).json({ error: "Something went wrong" });
         }
-    });
+    }) as unknown as RequestHandler
+);
 // Minimal bearer token middleware (always allow)
 app.use("/chat/completions", (req, res, next) => {
     const auth = req.headers["authorization"];
@@ -134,45 +147,50 @@ app.use("/v1/chat/completions", (req, res, next) => {
 });
 
 
-app.post("/chat/completions", async (req, res) => {
-    try {
-        const { model, messages, max_tokens = 1024, temperature = 1.0 } = req.body;
+app.post(
+    "/chat/completions",
+    (async (req: Request, res: Response) => {
+        try {
+            const { model, messages, max_tokens = 1024, temperature = 1.0 } = req.body;
 
-        // Validate required fields
-        if (typeof model !== "string" || !Array.isArray(messages)) {
-            return res.status(400).json({ error: "Missing required fields: model, messages" });
-        }
-        // Validate messages array
-        for (const msg of messages) {
-            if (
-                typeof msg !== "object" ||
-                typeof msg.role !== "string" ||
-                typeof msg.content !== "string"
-            ) {
-                return res.status(400).json({ error: "Invalid message format" });
+            // Validate required fields
+            if (typeof model !== "string" || !Array.isArray(messages)) {
+                return res.status(400).json({ error: "Missing required fields: model, messages" });
             }
-        }
-
-        // Dummy response
-        res.json({
-            choices: [
-                {
-                    message: {
-                        role: "assistant",
-                        content: "This is a dummy response."
-                    }
+            // Validate messages array
+            for (const msg of messages) {
+                if (
+                    typeof msg !== "object" ||
+                    typeof msg.role !== "string" ||
+                    typeof msg.content !== "string"
+                ) {
+                    return res.status(400).json({ error: "Invalid message format" });
                 }
-            ],
-            usage: {
-                total_tokens: 42
             }
-        });
-    } catch (error) {
-        res.status(500).json({ error: "Something went wrong" });
-    }
-});
 
-    app.get("/chat/:id/close", async (req, res) => {
+            // Dummy response
+            res.json({
+                choices: [
+                    {
+                        message: {
+                            role: "assistant",
+                            content: "This is a dummy response."
+                        }
+                    }
+                ],
+                usage: {
+                    total_tokens: 42
+                }
+            });
+        } catch (error) {
+            res.status(500).json({ error: "Something went wrong" });
+        }
+    }) as unknown as RequestHandler
+);
+
+app.get(
+    "/chat/:id/close",
+    (async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const chat = chats[id];
@@ -182,9 +200,9 @@ app.post("/chat/completions", async (req, res) => {
         }
 
         await chat.close();
+    }) as unknown as RequestHandler
+);
 
-        res.json({ status: "ok" });
-    });
 
     app.listen(port, () => {
         setInterval(async () => {
