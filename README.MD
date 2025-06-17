@@ -2,6 +2,8 @@
 
 This Node.js module allows you to interact with the ChatGPT website (https://chat.openai.com) using Puppeteer. It enables you to send messages to ChatGPT and receive responses, as well as create conversational sessions with the ability to send multiple messages and retrieve the conversation history. Additionally, it can run as a CLI application and a REST API server.
 
+See also: [mapet.md](./mapet.md)
+
 ## Installation
 To install the module, run the following command:
 
@@ -12,6 +14,26 @@ npm install pptr-gpt -g
 ```
 
 ## Usage
+
+### Quickstart
+
+```bash
+chmod +x mapet.sh stop.sh test/run-test.sh
+./mapet.sh
+```
+- Server runs in background, logs to YYYY.MM.DD-mapet.log
+
+To stop:
+```bash
+./stop.sh
+```
+
+To test:
+```bash
+./test/run-test.sh
+```
+- Runs API test (GET /, POST /ask "who are you"), checks logs, stops server
+
 
 ### CLI Usage
 You can run the module as a CLI application. The following options are available:

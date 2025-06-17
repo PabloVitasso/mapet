@@ -1,0 +1,13 @@
+Reading profile ./pptr-gpt.profile
+Reading profile /etc/firejail/allow-bin-sh.inc
+Reading profile /etc/firejail/disable-common.inc
+Reading profile /etc/firejail/disable-exec.inc
+Reading profile /etc/firejail/disable-programs.inc
+Reading profile /etc/firejail/disable-shell.inc
+Reading profile /etc/firejail/disable-X11.inc
+Reading profile /etc/firejail/disable-xdg.inc
+Reading profile /etc/firejail/whitelist-runuser-common.inc
+Parent pid 277450, child pid 277458
+Child process initialized in 104.59 ms
+Hello
+pptr-gpt running on port 3000
