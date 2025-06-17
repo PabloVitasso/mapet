@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Minimal OpenAI Q&A API
+  version: 1.0.0
+servers:
+  - url: https://api.openai.com/v1
+paths:
+  /chat/completions:
+    post:
+      summary: Generate chat completion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - model
+                - messages
+              properties:
+                model:
+                  type: string
+                  example: "gpt-3.5-turbo"
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - role
+                      - content
+                    properties:
+                      role:
+                        type: string
+                        enum: ["user", "assistant", "system"]
+                      content:
+                        type: string
+                max_tokens:
+                  type: integer
+                  default: 1024
+                temperature:
+                  type: number
+                  default: 1.0
+      responses:
+        '200':
+          description: Completion response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  choices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                            content:
+                              type: string
+                  usage:
+                    type: object
+                    properties:
+                      total_tokens:
+                        type: integer
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
